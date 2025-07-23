@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Providers } from "./providers";
+import { FarcasterProvider } from "./providers/FarcasterProvider";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -14,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "IQ Quiz App",
-  description: "Test your IQ with our interactive quiz",
+  title: "IQ Quiz - Powered by Base",
+  description: "Test your IQ and unlock results with ETH on Base",
 };
 
 export default function RootLayout({
@@ -29,7 +30,9 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <Providers>
-          {children}
+          <FarcasterProvider>
+        {children}
+          </FarcasterProvider>
         </Providers>
       </body>
     </html>

@@ -13,6 +13,9 @@ import { PAYMENT_AMOUNT } from "@/lib/wagmi"
 import { questions } from "@/lib/questions"
 // Type imported from questions.ts instead of redefined here
 import type { Question } from "@/lib/questions"
+import { useFarcaster } from "@/lib/hooks/useFarcaster"
+import { LoadingState } from "./LoadingState"
+import { useNetwork } from "wagmi"
 
 interface UserAnswer {
   questionId: number
@@ -31,8 +34,11 @@ export default function QuizClient() {
   const [timeLeft, setTimeLeft] = useState(600)
   const [timerActive, setTimerActive] = useState(false)
   const [showResults, setShowResults] = useState(false)
+  const [transactionHash, setTransactionHash] = useState<string | null>(null)
 
   const { handlePayment, isProcessing, error: paymentError, isConnected } = useWalletPayment()
+  const { isReady: isFarcasterReady, error: farcasterError } = useFarcaster()
+  const { chain: currentChain } = useNetwork()
 
   // Timer effect
   useEffect(() => {
@@ -95,7 +101,8 @@ export default function QuizClient() {
   const handleSeeMore = async () => {
     try {
       const result = await handlePayment()
-      if (result.success) {
+      if (result.success && result.hash) {
+        setTransactionHash(result.hash)
         setShowResults(true)
       }
     } catch (err) {
@@ -114,6 +121,30 @@ export default function QuizClient() {
     const minutes = Math.floor(seconds / 60)
     const remainingSeconds = seconds % 60
     return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`
+  }
+
+  // Show loading state while Farcaster initializes
+  if (!isFarcasterReady) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+        <LoadingState 
+          title="Initializing..."
+          message="Setting up the Mini App environment"
+        />
+      </div>
+    )
+  }
+
+  // Show loading state during transaction
+  if (isProcessing) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+        <LoadingState 
+          title="Processing Payment"
+          message="Please confirm the transaction in your wallet"
+        />
+      </div>
+    )
   }
 
   if (quizState === "welcome") {
@@ -216,6 +247,7 @@ export default function QuizClient() {
   if (quizState === "results") {
     const scoreLevel = getScoreLevel(score)
     const ScoreIcon = scoreLevel.icon
+    const isOnBase = currentChain?.id === 8453
 
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
@@ -230,9 +262,19 @@ export default function QuizClient() {
                 <p className="text-sm text-gray-600">
                   Connect your wallet and pay {PAYMENT_AMOUNT} ETH to see your detailed results
                 </p>
-                <p className="text-xs text-gray-500">
-                  {isConnected ? 'Wallet connected' : 'Wallet not connected'} • Base Network
-                </p>
+                <div className="flex items-center justify-center gap-2 text-xs text-gray-500">
+                  <span className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`} />
+                  <span>{isConnected ? 'Wallet Connected' : 'Wallet Not Connected'}</span>
+                  <span>•</span>
+                  <span className={`${isOnBase ? 'text-green-600' : 'text-orange-500'}`}>
+                    {isOnBase ? 'On Base Network' : 'Wrong Network'}
+                  </span>
+                </div>
+                {farcasterError && (
+                  <p className="text-xs text-red-500">
+                    Warning: {farcasterError}
+                  </p>
+                )}
               </div>
             )}
             {paymentError && (
@@ -250,12 +292,7 @@ export default function QuizClient() {
                 disabled={isProcessing || showResults}
               >
                 <Eye className="w-4 h-4 mr-2" />
-                {isProcessing ? (
-                  <>
-                    <div className="animate-spin w-4 h-4 border-2 border-current border-t-transparent rounded-full mr-2" />
-                    Processing...
-                  </>
-                ) : "See More"}
+                See More
               </Button>
               <Button onClick={startQuiz} className="flex-1">
                 <RotateCcw className="w-4 h-4 mr-2" />
@@ -263,14 +300,31 @@ export default function QuizClient() {
               </Button>
             </div>
             {showResults && (
-              <div className="mt-4 text-left">
-                <p className="text-xl font-bold mb-2">Your Score: {score}/10</p>
-                <p className="text-gray-600">
-                  Level: {scoreLevel.level}
-                </p>
+              <div className="mt-4 space-y-4">
+                <div className="text-left">
+                  <p className="text-xl font-bold mb-2">Your Score: {score}/10</p>
+                  <p className="text-gray-600">
+                    Level: {scoreLevel.level}
+                  </p>
+                </div>
+                {transactionHash && (
+                  <div className="bg-green-50 p-3 rounded-lg border border-green-200">
+                    <p className="text-xs text-green-800 break-all">
+                      Transaction: {transactionHash}
+                    </p>
+                    <a 
+                      href={`https://basescan.org/tx/${transactionHash}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-blue-600 hover:text-blue-800 mt-1 inline-block"
+                    >
+                      View on BaseScan
+                    </a>
+                  </div>
+                )}
                 <Button 
                   onClick={() => setQuizState("review")} 
-                  className="w-full mt-4"
+                  className="w-full"
                 >
                   View Detailed Analysis
                 </Button>

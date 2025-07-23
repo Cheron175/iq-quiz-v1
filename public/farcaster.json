@@ -1,0 +1,26 @@
+{
+  "name": "IQ Quiz",
+  "description": "Test your IQ and unlock results with ETH on Base",
+  "version": "1.0.0",
+  "image": "/app-icon.png",
+  "frames": {
+    "input": true,
+    "buttons": true,
+    "restrictDimension": true,
+    "aspectRatio": 1.91
+  },
+  "requiredChains": [
+    "eip155:8453"
+  ],
+  "requiredCapabilities": [
+    "wallet.getEthereumProvider",
+    "actions.ready",
+    "wallet.suggestChain"
+  ],
+  "hostPermissions": [
+    "basescan.org"
+  ],
+  "url": "https://iq-quiz-v1.vercel.app/",
+  "redirectUrl": "https://iq-quiz-v1.vercel.app/",
+  "domains": ["iq-quiz-v1.vercel.app"]
+}
