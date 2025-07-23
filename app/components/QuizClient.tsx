@@ -37,7 +37,7 @@ export default function QuizClient() {
   const [transactionHash, setTransactionHash] = useState<string | null>(null)
 
   const { handlePayment, isProcessing, error: paymentError, isConnected } = useWalletPayment()
-  const { isReady: isFarcasterReady, error: farcasterError } = useFarcaster()
+  const { is: isFarcaster, error: farcasterError } = useFarcaster()
   const { chain: currentChain } = useNetwork()
 
   // Timer effect
@@ -124,7 +124,7 @@ export default function QuizClient() {
   }
 
   // Show loading state while Farcaster initializes
-  if (!isFarcasterReady) {
+  if (!isFarcaster) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
         <LoadingState 

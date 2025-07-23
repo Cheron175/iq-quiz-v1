@@ -3,19 +3,19 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
 
 interface FarcasterContextType {
-  isReady: boolean
+  is: boolean
   error: string | null
 }
 
 const FarcasterContext = createContext<FarcasterContextType>({
-  isReady: false,
+  is: false,
   error: null
 })
 
 export const useFarcaster = () => useContext(FarcasterContext)
 
 export function FarcasterProvider({ children }: { children: ReactNode }) {
-  const [isReady, setIsReady] = useState(false)
+  const [is, setIs] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -29,7 +29,7 @@ export function FarcasterProvider({ children }: { children: ReactNode }) {
           window.location.ancestorOrigins?.[0]?.includes('warpcast.com')
         
         if (mounted) {
-          setIsReady(true)
+          setIs(true)
           if (!isFarcaster) {
             console.warn('Not running in a Farcaster frame environment')
           }
@@ -52,7 +52,7 @@ export function FarcasterProvider({ children }: { children: ReactNode }) {
   }, [])
 
   return (
-    <FarcasterContext.Provider value={{ isReady, error }}>
+    <FarcasterContext.Provider value={{ is, error }}>
       {children}
     </FarcasterContext.Provider>
   )

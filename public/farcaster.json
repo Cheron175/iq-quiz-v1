@@ -14,7 +14,7 @@
   ],
   "requiredCapabilities": [
     "wallet.getEthereumProvider",
-    "actions.ready",
+    "actions.",
     "wallet.suggestChain"
   ],
   "hostPermissions": [

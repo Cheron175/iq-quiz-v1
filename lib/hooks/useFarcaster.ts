@@ -1,18 +1,20 @@
 import { useEffect, useState } from 'react'
+import { sdk } from '@farcaster/js' 
 
 export function useFarcaster() {
-  const [isReady, setIsReady] = useState(false)
+  const [isReady, setIs] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     const checkFarcasterEnvironment = async () => {
       try {
-        // Check if we're in a Farcaster frame environment
+        await sdk.actions.ready()
+
         const isFarcaster = typeof window !== 'undefined' && 
           window.parent !== window && 
           window.location.ancestorOrigins?.[0]?.includes('warpcast.com')
         
-        setIsReady(true)
+        setIs(true)
         if (!isFarcaster) {
           console.warn('Not running in a Farcaster frame environment')
         }
@@ -26,4 +28,4 @@ export function useFarcaster() {
   }, [])
 
   return { isReady, error }
-} 
+}
