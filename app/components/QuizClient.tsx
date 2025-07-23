@@ -5,10 +5,14 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
-import { CheckCircle, XCircle, RotateCcw, Eye, Brain, Trophy, Target, Clock, Wallet } from "lucide-react"
+import { CheckCircle, XCircle, RotateCcw, Eye, Brain, Trophy, Target, Clock } from "lucide-react"
+// Import commented out until needed for wallet connection UI
+// import { Wallet } from "lucide-react"
 import { useWalletPayment } from "@/lib/hooks/useWalletPayment"
 import { PAYMENT_AMOUNT } from "@/lib/wagmi"
-import { questions, type Question } from "@/lib/questions"
+import { questions } from "@/lib/questions"
+// Type imported from questions.ts instead of redefined here
+import type { Question } from "@/lib/questions"
 
 interface UserAnswer {
   questionId: number
